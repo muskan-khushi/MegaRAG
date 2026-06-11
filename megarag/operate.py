@@ -1528,12 +1528,16 @@ async def extract_entities_refinement(
     llm_response_cache: BaseKVStorage | None = None,
     text_chunks_storage: BaseKVStorage | None = None,
 ) -> list:
-    chunk_results_at_stage_one = {
-        list(res[0].values())[0][0]['source_id']: {
-            'nodes': res[0],
-            'edges': res[1],
-        } for res in chunk_results
-    }
+    # Build stage-1 index keyed by chunk key (not source_id from nodes,
+    # which crashes when a chunk produces 0 entities).
+    chunk_results_at_stage_one = {}
+    for (c_key, _chunk_dp), (s1_nodes, s1_edges) in zip(
+        list(chunks.items()), chunk_results
+    ):
+        chunk_results_at_stage_one[c_key] = {
+            'nodes': s1_nodes,
+            'edges': s1_edges,
+        }
 
     use_llm_func: callable = global_config["llm_model_func"]
     entity_extract_max_gleaning = global_config["addon_params"]["entity_extract_max_gleaning"]
