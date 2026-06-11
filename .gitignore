@@ -9,3 +9,11 @@ env.sh
 lib
 !lib/.gitkeepenv.sh
 env.sh
+envs/
+ollama_local/
+ollama.log
+mineru_models/
+hf_cache/
+logs/
+*.out
+*.err
