@@ -1,7 +1,0 @@
-prefix=/scratch/data/divyasaxena_rs/Muskan_internship/MegaRAG/.../envs/mineru
-includedir=${prefix}/include
- 
-Name: XExtProto
-Description: XExt extension headers
-Version: 7.3.0
-Cflags: -I${includedir}

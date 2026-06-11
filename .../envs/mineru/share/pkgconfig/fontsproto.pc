@@ -1,7 +1,0 @@
-prefix=/scratch/data/divyasaxena_rs/Muskan_internship/MegaRAG/.../envs/mineru
-includedir=${prefix}/include
- 
-Name: FontsProto
-Description: Fonts extension headers
-Version: 2.1.3
-Cflags: -I${includedir}

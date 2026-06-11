@@ -17,3 +17,4 @@ hf_cache/
 logs/
 *.out
 *.err
+*.log

@@ -1,7 +1,0 @@
-prefix=/scratch/data/divyasaxena_rs/Muskan_internship/MegaRAG/.../envs/mineru
-includedir=${prefix}/include
- 
-Name: ScrnSaverProto
-Description: ScrnSaver extension headers
-Version: 1.2.3
-Cflags: -I${includedir}
