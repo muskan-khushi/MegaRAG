@@ -136,10 +136,14 @@ async def openai_complete_if_cache(
         return {"type": "image_url", "image_url": {"url": url}}
 
     if input_images:
-        # Vision models expect *array* content when mixing text & images
-        image_items = [_img_item(p) for p in input_images]
-        text_item = {"type": "text", "text": prompt}
-        messages.append({"role": "user", "content": [*image_items, text_item]})
+        # Filter out missing local files
+        image_items = [_img_item(p) for p in input_images if Path(p).is_file() or p.startswith("http")]
+        if image_items:
+            # Vision models expect *array* content when mixing text & images
+            text_item = {"type": "text", "text": prompt}
+            messages.append({"role": "user", "content": [*image_items, text_item]})
+        else:
+            messages.append({"role": "user", "content": prompt})
     else:
         messages.append({"role": "user", "content": prompt})
 

@@ -1382,7 +1382,7 @@ async def extract_entities(
 
         images = []
         if "page_img" in chunk_dp:
-            images = [chunk_dp["page_img"]] + chunk_dp["fig_imgs"]
+            images = [img for img in ([chunk_dp["page_img"]] + chunk_dp["fig_imgs"]) if img]
         # Get file path from chunk data or use default
         file_path = chunk_dp.get("file_path", "unknown_source")
 
@@ -1655,7 +1655,7 @@ async def extract_entities_refinement(
 
         images = []
         if "page_img" in chunk_dp:
-            images = [chunk_dp["page_img"]] + chunk_dp["fig_imgs"]
+            images = [img for img in ([chunk_dp["page_img"]] + chunk_dp["fig_imgs"]) if img]
         # Get file path from chunk data or use default
         file_path = chunk_dp.get("file_path", "unknown_source")
 
