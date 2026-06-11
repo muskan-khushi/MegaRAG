@@ -50,12 +50,15 @@ async def gpt_4o_mini_complete(
     keyword_extraction = kwargs.pop("keyword_extraction", None)
     if keyword_extraction:
         kwargs["response_format"] = GPTKeywordExtractionFormat
+    import os
     return await openai_complete_if_cache(
-        "gpt-4o-mini",
+        "qwen2.5:7b",
         prompt,
         system_prompt=system_prompt,
         history_messages=history_messages,
         input_images=input_images,
+        base_url=os.getenv("OPENAI_API_BASE", "http://localhost:11434/v1"),
+        api_key=os.getenv("OPENAI_API_KEY", "ollama"),
         **kwargs,
     )
 
@@ -84,7 +87,7 @@ async def openai_complete_if_cache(
     """Complete *prompt* with OpenAI, supporting optional image inputs.
 
     Args:
-        model:          Vision‑capable model (e.g. ``"gpt-4o-mini"``)
+        model:          Vision‑capable model (e.g. ``"qwen2.5:7b"``)
         prompt:         User text prompt.
         system_prompt:  System message.
         history_messages: Prior conversation turns.

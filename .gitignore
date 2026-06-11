@@ -7,4 +7,5 @@ egs/*/data/
 
 env.sh
 lib
-!lib/.gitkeep
+!lib/.gitkeepenv.sh
+env.sh

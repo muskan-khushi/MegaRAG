@@ -388,7 +388,7 @@ async def _build_query_context_for_refine(
                 concise_relations_context.append({
                     'source_entity': relation['entity1'],
                     'target_entity': relation['entity2'],
-                    'description': entity['description'],
+                    'description': relation['description'],
                 })
             relations_context = truncate_list_by_token_size(
                 concise_relations_context,
