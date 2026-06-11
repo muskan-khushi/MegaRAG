@@ -1,0 +1,13 @@
+============================================================
+Job ID:  342211
+Node:    gpu1
+Started: Wed Jun 10 21:19:30 IST 2026
+============================================================
+Ollama started (PID: 2377672)
+{"models":[{"name":"nomic-embed-text:latest","model":"nomic-embed-text:latest","modified_at":"2026-0NVIDIA A100-SXM4-40GB, 40960 MiB
+CUDA available: True
+Rendering pages 1–10 of 788 at 150 DPI to JPEG using 8 processes…
+Done ✔
+============================================================
+Done: Wed Jun 10 21:20:09 IST 2026 | Exit code: 1
+============================================================

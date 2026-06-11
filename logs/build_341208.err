@@ -1,0 +1,93 @@
+cpu-bind=MASK - gpu1, task  0  0 [2142413]: mask 0x1800000000000000000000000000000018000000000000000000000000000000 set
+2026-06-10 12:20:20.281 | ERROR    | magic_pdf.tools.cli:parse_doc:134 - No module named 'ultralytics'
+Traceback (most recent call last):
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/envs/mineru/bin/magic-pdf", line 6, in <module>
+    sys.exit(cli())
+    │   │    └ <Command cli>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/envs/mineru/lib/python3.10/site-packages/click/core.py", line 1524, in __call__
+    return self.main(*args, **kwargs)
+           │    │     │       └ {}
+           │    │     └ ()
+           │    └ <function Command.main at 0x7f690a10a560>
+           └ <Command cli>
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/envs/mineru/lib/python3.10/site-packages/click/core.py", line 1445, in main
+    rv = self.invoke(ctx)
+         │    │      └ <click.core.Context object at 0x7f690a5b30d0>
+         │    └ <function Command.invoke at 0x7f690a10a440>
+         └ <Command cli>
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/envs/mineru/lib/python3.10/site-packages/click/core.py", line 1308, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+           │   │      │    │           │   └ {'path': './data/World_History_Volume_1.pdf', 'output_dir': './dumps/', 'lang': 'en', 'end_page_id': 9, 'method': 'auto', 'de...
+           │   │      │    │           └ <click.core.Context object at 0x7f690a5b30d0>
+           │   │      │    └ <function cli at 0x7f684353ee60>
+           │   │      └ <Command cli>
+           │   └ <function Context.invoke at 0x7f690a1097e0>
+           └ <click.core.Context object at 0x7f690a5b30d0>
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/envs/mineru/lib/python3.10/site-packages/click/core.py", line 877, in invoke
+    return callback(*args, **kwargs)
+           │         │       └ {'path': './data/World_History_Volume_1.pdf', 'output_dir': './dumps/', 'lang': 'en', 'end_page_id': 9, 'method': 'auto', 'de...
+           │         └ ()
+           └ <function cli at 0x7f684353ee60>
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/tools/cli.py", line 155, in cli
+    parse_doc(Path(path))
+    │         │    └ './data/World_History_Volume_1.pdf'
+    │         └ <class 'pathlib.Path'>
+    └ <function cli.<locals>.parse_doc at 0x7f684353e9e0>
+
+> File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/tools/cli.py", line 121, in parse_doc
+    do_parse(
+    └ <function do_parse at 0x7f684353e440>
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/tools/common.py", line 284, in do_parse
+    _do_parse(output_dir, pdf_file_name, pdf_bytes_or_dataset, model_list, parse_method, debug_able, start_page_id=start_page_id, end_page_id=end_page_id, lang=lang, layout_model=layout_model, formula_enable=formula_enable, table_enable=table_enable,  f_draw_span_bbox=f_draw_span_bbox, f_draw_layout_bbox=f_draw_layout_bbox, f_dump_md=f_dump_md, f_dump_middle_json=f_dump_middle_json, f_dump_model_json=f_dump_model_json, f_dump_orig_pdf=f_dump_orig_pdf, f_dump_content_list=f_dump_content_list, f_make_md_mode=f_make_md_mode, f_draw_model_bbox=f_draw_model_bbox, f_draw_line_sort_bbox=f_draw_line_sort_bbox, f_draw_char_bbox=f_draw_char_bbox)
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             │                                     │                                  │                                    │                                   │                                 │                                        │                                       └ False
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             │                                     │                                  │                                    │                                   │                                 │                                        └ False
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             │                                     │                                  │                                    │                                   │                                 └ False
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             │                                     │                                  │                                    │                                   └ 'mm_markdown'
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             │                                     │                                  │                                    └ True
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             │                                     │                                  └ True
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             │                                     └ True
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             │                             └ True
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    │                             └ True
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               │                                    └ True
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            │                               └ True
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            │                            └ None
+    │         │           │              │                     │           │             │                         │                          │                 │                  │                            └ None
+    │         │           │              │                     │           │             │                         │                          │                 │                  └ None
+    │         │           │              │                     │           │             │                         │                          │                 └ 'en'
+    │         │           │              │                     │           │             │                         │                          └ 9
+    │         │           │              │                     │           │             │                         └ 0
+    │         │           │              │                     │           │             └ False
+    │         │           │              │                     │           └ 'auto'
+    │         │           │              │                     └ []
+    │         │           │              └ b'%PDF-1.6\r%\xe2\xe3\xcf\xd3\r\n7773 0 obj\r<</Filter/FlateDecode/First 152/Length 856/N 16/Type/ObjStm>>stream\r\nh\xde\xcc...
+    │         │           └ 'World_History_Volume_1'
+    │         └ './dumps/'
+    └ <function _do_parse at 0x7f684353e3b0>
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/tools/common.py", line 95, in _do_parse
+    from magic_pdf.operators.models import InferenceResult
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/operators/models.py", line 13, in <module>
+    from magic_pdf.pdf_parse_union_core_v2 import pdf_parse_union
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/pdf_parse_union_core_v2.py", line 29, in <module>
+    from magic_pdf.model.sub_modules.model_init import AtomModelSingleton
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/model/sub_modules/model_init.py", line 6, in <module>
+    from magic_pdf.model.sub_modules.language_detection.yolov11.YOLOv11 import YOLOv11LangDetModel
+
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MinerU/magic_pdf/model/sub_modules/language_detection/yolov11/YOLOv11.py", line 9, in <module>
+    from ultralytics import YOLO
+
+ModuleNotFoundError: No module named 'ultralytics'
+Traceback (most recent call last):
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MegaRAG/egs/world_history_tiny/../utils/build_page_assets.py", line 219, in <module>
+    main()
+  File "/scratch/data/divyasaxena_rs/Muskan_internship/MegaRAG/egs/world_history_tiny/../utils/build_page_assets.py", line 201, in main
+    raise FileNotFoundError(f"Required path not found: {p}")
+FileNotFoundError: Required path not found: dumps/World_History_Volume_1/auto/World_History_Volume_1_middle.json
