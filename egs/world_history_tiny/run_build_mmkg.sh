@@ -23,7 +23,7 @@ PDF_PATH="./data/World_History_Volume_1.pdf"
 "${MINERU_PATH}/magic-pdf" -p "${PDF_PATH}" -o "./dumps/" -l en -e 9
 
 # PDF to Image
-python3 ../utils/pdf2img.py \
+/scratch/data/divyasaxena_rs/Muskan_internship/envs/megarag/bin/python ../utils/pdf2img.py
     "${PDF_PATH}" \
     "./dumps/World_History_Volume_1/auto/page_images" \
     --dpi 150 \
@@ -32,12 +32,12 @@ python3 ../utils/pdf2img.py \
     --jobs 8
 
 # Process Input for MegaRAG
-python3 ../utils/build_page_assets.py \
+/scratch/data/divyasaxena_rs/Muskan_internship/envs/megarag/bin/python ../utils/build_page_assets.py
     --working-dir "./dumps/World_History_Volume_1/auto" \
     --output "./dumps/World_History_Volume_1/pages_content.json"
 
 # 2) Construct MMKG
-python3 ../utils/construct_mmkg.py \
+/scratch/data/divyasaxena_rs/Muskan_internship/envs/megarag/bin/python ../utils/construct_mmkg.py
     --config-file "./conf/addon_params.yaml" \
     --working-dir "./exp/World_History_Volume_1" \
     --input-dir "./dumps/World_History_Volume_1/pages_content.json"

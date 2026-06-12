@@ -99,8 +99,6 @@ async def initialize_rag(working_dir: Path, addon_params: dict) -> Tuple[MegaRAG
             history_messages=history_messages,
             keyword_extraction=keyword_extraction,
             token_tracker=token_tracker,
-            base_url=os.getenv("OPENAI_API_BASE", "http://localhost:11434/v1"),
-            api_key=os.getenv("OPENAI_API_KEY", "ollama"),
             **kwargs,
         )
 
