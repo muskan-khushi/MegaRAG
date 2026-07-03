@@ -2269,5 +2269,23 @@ async def kg_two_step_query(
                 cache_type="query",
             ),
         )
+        try:
+          debug_file = os.path.join(
+            global_config["working_dir"],
+            "intermediate_answers.jsonl"
+          )
 
-    return response
+          debug_record = {
+            "query": query,
+            "kg_answer": kg_response,
+            "image_answer": naive_response,
+            "fusion_answer": response,
+            "timestamp": time.time(),
+          }
+
+          with open(debug_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(debug_record, ensure_ascii=False) + "\n")
+
+        except Exception as e:
+         logger.warning(f"Failed to save intermediate answers: {e}")
+        return response
