@@ -1,0 +1,11 @@
+Query,KG,Image,Fusion,Hallucinations,Winner,Notes
+1,4.25,3.25,2.75,18,KG,"Fusion introduced numerous unsupported citations and file paths"
+2,,,,4,,
+3,,,,25,,
+4,,,,1,,
+5,,,,4,,
+6,4.25,4.50,3.75,0,Image,"Fusion contains fabricated document references and placeholder paths"
+7,,,,14,,
+8,,,,7,,
+9,,,,0,,
+10,,,,0,,
