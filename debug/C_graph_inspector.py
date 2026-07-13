@@ -63,7 +63,7 @@ files = {
     "kv_store_text_chunks.json":    "Text chunk KV store",
     "kv_store_full_docs.json":      "Full docs KV store",
     "kv_store_doc_status.json":     "Doc status KV store",
-    "llm_response_cache.json":      "LLM cache",
+    "kv_store_llm_response_cache.json":      "LLM cache",
 }
 all_present = True
 for fname, label in files.items():
@@ -241,7 +241,7 @@ print("STEP 7: LLM cache statistics")
 print("-" * 40)
 
 try:
-    cache = load_json(exp_dir / "llm_response_cache.json")
+    cache = load_json(exp_dir / "kv_store_llm_response_cache.json")
     total_cached = len(cache)
     print(f"  Cached LLM calls: {total_cached}")
     print(f"  (Higher = faster reruns; 10-page build typically caches 20-30 calls)")

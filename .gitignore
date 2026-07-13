@@ -18,3 +18,4 @@ logs/
 *.out
 *.err
 *.log
+backups/World_History_Volume_1_full_success/kv_store_llm_response_cache.json
