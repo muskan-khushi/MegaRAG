@@ -1,41 +1,55 @@
-# MegaRAG: Multimodal Graph-based Retrieval Augmented Generation
+# MegaRAG — Replication & Empirical Extensions
 
-<p align="center">
-  <a href="https://arxiv.org/abs/2512.20626"><img src="https://img.shields.io/badge/arXiv-2512.20626-b31b1b.svg" alt="Paper on ArXiv"></a>
-  <img alt="License" src="https://img.shields.io/badge/license-custom-lightgrey">
-  <img alt="Python" src="https://img.shields.io/badge/python-3.10-blue">
-  <img alt="ACL 2026" src="https://img.shields.io/badge/ACL-2026-green">
-</p>
+**SURAJ 2026 Summer Undergraduate Research Internship**
+IIT Jodhpur, School of AI & Data Science (SAIDE) · Machine Intelligence Lab
+Mentor: Dr. Divya Saxena · JRF Guidance: Aditya Sharma
+Intern: Muskan (NIT Patna)
 
-**MegaRAG** enables **global visual question answering** on documents by constructing a **Multimodal Knowledge Graph (MMKG)**. It combines graph-based reasoning with multimodal page retrieval for precise and rich responses across text and images.
+This repository is a replication of **MegaRAG** (Hsiao et al., ACL 2026, [arXiv:2512.20626](https://arxiv.org/abs/2512.20626)) — a multimodal knowledge-graph RAG framework — run end-to-end on a 788-page World History textbook using a fully local, zero-API-cost stack (Ollama + GME) on the IIT Jodhpur `dgx` SLURM cluster. It also contains two original empirical research extensions built on top of the replicated pipeline (see [Research Extensions](#-research-extensions-d1--d5)).
 
-> This work has been accepted to **ACL 2026**.
+> For the unmodified upstream project, see [AI-Application-and-Integration-Lab/MegaRAG](https://github.com/AI-Application-and-Integration-Lab/MegaRAG).
+
+---
 
 ## 🚀 Overview
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/219ae758-b54c-45c9-a261-b63644ffec08" style="width:90%;" alt="MegaRAG Architecture" />
-</p>
 
-MegaRAG builds a knowledge graph from your PDF documents — extracting entities and relationships from both OCR text and page images using a vision LLM — then answers questions by combining graph traversal with multimodal vector search.
+MegaRAG builds a **Multimodal Knowledge Graph (MMKG)** from PDF documents — extracting entities and relationships from both OCR text and page images via a vision LLM — then answers questions by fusing graph traversal with multimodal page-image vector search.
 
-## 📦 Installation
+**This replication's results (full corpus, 788 pages):**
+| Metric | Value |
+|---|---|
+| Entities extracted | 3,657 |
+| Relationships extracted | 1,910 |
+| Page (chunk) vectors | 775 |
+| Benchmark questions answered | 125 / 125, zero failures |
+
+---
+
+## 📦 Installation (Cluster Setup — IIT Jodhpur `dgx`)
 
 ### Requirements
+- Python 3.10+
+- GPU for embedding inference (A100 used here; GME requires CUDA)
+- Local LLM via Ollama (no OpenAI key needed — see [Zero-Cost Local Setup](#-zero-cost-local-setup-ollama))
 
-* Python 3.10+ (3.10 recommended)
-* GPU for embeddings inference (GME model requires CUDA)
-* OpenAI-compatible LLM endpoint (OpenAI API key, or local Ollama — see Zero-Cost Setup below)
+### ⚠️ Cluster gotcha: `anaconda3/2024` module corrupts `PATH`
+On this cluster, loading the `anaconda3/2024` module breaks `PATH` resolution. **After every `conda activate`, re-export `PATH` explicitly**, or subsequent commands will silently resolve to the wrong interpreter:
+```bash
+conda activate megarag
+export PATH="$CONDA_PREFIX/bin:$PATH"
+```
+Apply this after activating **either** environment (`mineru` or `megarag`).
 
-### Step 1: Install [MinerU](https://github.com/opendatalab/MinerU/tree/release-1.3.6)
-
+### Step 1: Install MinerU
 ```bash
 git clone -b release-1.3.6 https://github.com/opendatalab/MinerU.git
 cd MinerU
 
 conda create --name mineru python=3.10 -y
 conda activate mineru
+export PATH="$CONDA_PREFIX/bin:$PATH"
 pip install -e .
-pip install omegaconf   # required — not included in MinerU dependencies
+pip install omegaconf   # required — not listed in MinerU's own dependencies
 
 pip install huggingface_hub
 wget https://raw.githubusercontent.com/opendatalab/MinerU/refs/heads/release-1.3.6/scripts/download_models_hf.py -O download_models_hf.py
@@ -43,23 +57,26 @@ sed -i "s|https://github.com/opendatalab/MinerU/raw/master/magic-pdf.template.js
 python download_models_hf.py
 ```
 
-> **Note:** `omegaconf` must be installed manually in the mineru environment — it is not listed in MinerU's requirements but is required for OCR to work.
+**Cluster-specific OCR fixes applied in this repo:**
+- **PP-OCR weight remap:** the downloaded PP-OCRv5 weights were remapped to the PP-OCRv4 paths MinerU 1.3.6 expects (the release pins v4 paths internally).
+- **Language flag removed:** the `-l en` flag was dropped from the MinerU invocation to align with the multilingual checkpoint actually being loaded — passing `-l en` against a multilingual checkpoint caused silent misbehavior.
 
 ### Step 2: Install MegaRAG
-
 ```bash
 git clone https://github.com/AI-Application-and-Integration-Lab/MegaRAG.git
 cd MegaRAG
 
 conda activate mineru
+export PATH="$CONDA_PREFIX/bin:$PATH"
 pip install -r requirements_mineru.txt
 
 conda create --name megarag python=3.10 -y
 conda activate megarag
+export PATH="$CONDA_PREFIX/bin:$PATH"
 pip install -e .
 
 cp .env.sh env.sh
-# Fill in your OPENAI_API_KEY and MINERU_PATH in env.sh
+# Fill in MINERU_PATH in env.sh. OPENAI_API_KEY is unused with Ollama — see below.
 
 mkdir lib && cd lib
 git clone --branch v1.4.3 https://github.com/HKUDS/LightRAG.git
@@ -68,122 +85,82 @@ pip install -e .
 ```
 
 ### Step 3: Apply the refinement bug fix
-
 ```bash
 conda activate megarag
 python debug/apply_refinement_fix.py
 ```
+Patches a known `IndexError` in `operate.py` triggered when any page produces zero entities (cover pages, blank pages, image-only pages). Safe to re-run.
 
-This patches a known `IndexError` crash in `operate.py` that occurs when any page produces zero entities (cover pages, blank pages, image-only pages). Safe to run multiple times.
+---
 
 ## 🆓 Zero-Cost Local Setup (Ollama)
 
-You can run MegaRAG entirely locally using [Ollama](https://ollama.com) instead of the OpenAI API.
+This replication runs entirely locally — no OpenAI spend.
 
-**Tested with:** `qwen2.5:7b` for entity extraction and querying, `gme-Qwen2-VL-2B-Instruct` for multimodal embeddings.
+- **LLM:** `qwen2.5:7b` (substitute for GPT-4o-mini) for entity extraction and querying
+- **Embeddings:** `Alibaba-NLP/gme-Qwen2-VL-2B-Instruct` (GME) for multimodal text+image vectors
 
 ```bash
-# Install Ollama and pull the model
 ollama pull qwen2.5:7b
 
-# Set env.sh to point at Ollama
 export OPENAI_API_KEY="ollama"
 export OPENAI_API_BASE="http://localhost:11434/v1"
 
-# Start Ollama before running any pipeline step
 ollama serve &
 ```
 
-**Important — set example_number to 3:** When using local models, use 3-shot examples to ensure the model follows the structured output format correctly.
+**⚠️ SLURM note:** `ollama serve` must be started **inside each SLURM compute job**, not on the login node. Login-node Ollama instances are not reachable from compute nodes and builds will hang waiting on the LLM endpoint.
 
+**Set `example_number: 3` for local models:**
 ```yaml
-# In egs/<your_dataset>/conf/addon_params.yaml
+# egs/<your_dataset>/conf/addon_params.yaml
 example_number: 3
 ```
+3-shot prompting is required for `qwen2.5:7b` to reliably follow the structured extraction format; with `example_number: 1` (the GPT-4o default) it frequently degrades to 0 Ent + 0 Rel per chunk.
+
+---
 
 ## 🔍 Pre-Flight Validation (run before every build)
 
-MegaRAG includes a debug suite in `debug/` to validate your setup on the login node before submitting GPU jobs. This takes 5 minutes and prevents wasted compute hours.
+Run the debug suite on the login node before submitting any GPU job — takes ~5 minutes and avoids burning compute hours on a broken config.
 
 ```bash
 conda activate megarag
 
 # Static checks (no GPU, no Ollama needed)
-python debug/apply_refinement_fix.py   # patch the IndexError bug
-python debug/E_refinement_audit.py     # verify the fix and refinement logic
-python debug/B_prompt_inspector.py     # check prompt assembly and image paths
+python debug/apply_refinement_fix.py
+python debug/E_refinement_audit.py
+python debug/B_prompt_inspector.py
 
-# Live checks (Ollama must be running)
-python debug/A_query_smoke_test.py     # imports, LLM call, storage init, keywords
+# Live check (Ollama must be running)
+python debug/A_query_smoke_test.py
 
 # Post-build validation
-python debug/C_graph_inspector.py      # entity count, relationship count, graph health
+python debug/C_graph_inspector.py
 ```
-
 Do not submit a build job until `A_query_smoke_test.py` shows all ✓ PASS.
 
-## ⚡ Quickstart
+---
 
-### 1. Use the Tiny Example
+## 📂 Corpus Used in This Replication
 
-```bash
-cd egs/world_history_tiny
-mkdir data
-```
+This repo's `egs/` recipe targets a 788-page World History textbook, validated in two staged passes:
 
-### 2. Download Example PDF
-
-Download the example PDF and query file from [Google Drive](https://drive.google.com/drive/folders/1iuukUWsxMYobuDRLRJ3dBOkB9mdPGoPp?usp=sharing) and place in `data/`.
-
-### 3. Build the Multimodal Knowledge Graph
+1. **10-page pilot** — deliberate staged validation to confirm the pipeline, prompts, and OCR fixes were correct before committing GPU hours to the full corpus.
+2. **788-page full-corpus run** — produced the final MMKG (3,657 entities, 1,910 relationships, 775 page vectors) used for all benchmark and research results.
 
 ```bash
-bash ./run_build_mmkg.sh
-```
-
-Watch for `Chunk X of N extracted M Ent + K Rel` in the output — M and K should both be > 0. If you see `0 Ent + 0 Rel` on every chunk, increase `example_number` to 3 in `conf/addon_params.yaml`.
-
-### 4. Query with MegaRAG
-
-```bash
-bash ./run_querying.sh
-```
-
-## 📂 Using Your Own Dataset
-
-### 1. Create a New Recipe
-
-```bash
-cp -r egs/.template egs/<your_dataset>
 cd egs/<your_dataset>
-mkdir data
+mkdir data          # place source PDF here
+bash run_build_mmkg.sh
+bash run_querying.sh
 ```
 
-### 2. Add Your Data
+Watch build logs for `Chunk X of N extracted M Ent + K Rel` — both `M` and `K` should be `> 0` on every chunk. Persistent `0 Ent + 0 Rel` means the model isn't following the output format; raise `example_number` or check the OCR fixes above.
 
-Place your PDF in `data/`.
-
-### 3. Edit the Config
-
-```yaml
-# conf/addon_params.yaml
-example_number: 3          # use 3 for local models; 1 for GPT-4o
-language: English
-entity_types:
-  - your_entity_type_1
-  - your_entity_type_2
-```
-
-### 4. Build and Query
-
-```bash
-bash egs/<your_dataset>/run_build_mmkg.sh
-bash egs/<your_dataset>/run_querying.sh
-```
+---
 
 ## 🏗️ Architecture
-
-MegaRAG extends [LightRAG](https://github.com/HKUDS/LightRAG) with multimodal capabilities:
 
 ```
 PDF → MinerU OCR → pages_content.json
@@ -202,27 +179,54 @@ PDF → MinerU OCR → pages_content.json
                         ▼
               vdb_entities.json              entity vectors
               vdb_relationships.json         relationship vectors
-              vdb_chunks.json               PAGE IMAGE vectors (multimodal retrieval)
-              graph_*.graphml               knowledge graph
+              vdb_chunks.json                page image vectors (multimodal retrieval)
+              graph_*.graphml                knowledge graph
 ```
 
-**Query pipeline (mix_two_step mode):**
-- KG path: keyword extraction → graph traversal → text chunk retrieval → LLM answer
-- Naive path: GME vector search on page images → visual LLM answer
-- Merge: both answers synthesized into final response
+**Query pipeline (`mix_two_step` mode):**
+- **KG path:** keyword extraction → graph traversal → text chunk retrieval → LLM answer
+- **Naive path:** GME vector search on page images → visual LLM answer
+- **Merge:** both answers synthesized into the final response
+
+---
+
+## 🔬 Research Extensions (D1 & D5)
+
+Beyond replication, this project contributes two falsifiable, empirically-tested research directions, motivated by structural gaps identified in the original paper.
+
+### D1 — Minimal Sufficient Structure Hypothesis
+The paper's A2 ablation conflates graph *structure* with graph *symbolic content*, leaving open which factor actually drives QA performance. This work isolates that question by building a **Pseudo-Entity Graph (PEG)** — a zero-LLM-cost graph structure — and comparing it against the full MMKG (which required ~2,700 LLM extraction calls to build). The PEG achieved strong factual consistency **without any of those extraction calls**, suggesting construction-cost framing (rather than raw entity-count comparisons) is the more defensible way to present graph-structure ablations.
+
+### D5 — Intermediate Answer Disagreement Signal
+An audit of the KG-path vs. naive (image) path in the `mix_two_step` fusion stage found:
+- **Mean inter-branch lexical similarity: 0.047** — the two branches' intermediate answers rarely agree in wording.
+- **The fusion stage favored image-branch evidence in 79.2% of questions**, despite prompt instructions explicitly telling the model to prefer the knowledge-graph path.
+
+This surfaces a latent disagreement signal in the pipeline that the original fusion prompt does not account for.
+
+### Other structural observations documented during replication
+- The `relationship_strength` field is generated by MegaRAG's extraction prompt but is **never stored or used downstream** — a structural gap in the reference implementation.
+- All three MegaRAG generation prompts include an inert **timestamp-conflict-resolution block**; the merge step discards the provenance data this logic depends on, so the block never fires in practice.
+
+---
 
 ## 🐛 Known Issues and Fixes
 
 | Issue | Fix |
-|-------|-----|
-| `IndexError` in refinement when a page has 0 entities | Run `python debug/apply_refinement_fix.py` |
-| `ModuleNotFoundError: omegaconf` in MinerU | `pip install omegaconf` in the mineru conda env |
-| Relationships extracted with wrong field count (local models) | Set `example_number: 3` in addon_params.yaml |
-| `0 Ent + 0 Rel` on every chunk | Model not following format — bump example_number or use a larger model |
+|---|---|
+| `IndexError` in refinement when a page has 0 entities | `python debug/apply_refinement_fix.py` |
+| `ModuleNotFoundError: omegaconf` in MinerU | `pip install omegaconf` in the `mineru` conda env |
+| Relationships extracted with wrong field count (local models) | Set `example_number: 3` in `addon_params.yaml` |
+| `0 Ent + 0 Rel` on every chunk | Model not following format — bump `example_number` or use a larger model |
+| `PATH` broken after `conda activate` | Re-run `export PATH="$CONDA_PREFIX/bin:$PATH"` after activation (this cluster only) |
+| PP-OCR weights fail to load | Remap PP-OCRv5 weight files to PP-OCRv4 paths |
+| Ollama unreachable during SLURM build | Start `ollama serve` inside the compute job, not on the login node |
+
+---
 
 ## Acknowledgments
 
-MegaRAG is inspired by the work of [LightRAG](https://github.com/HKUDS/LightRAG). We are grateful for their excellent tools and contributions.
+MegaRAG is inspired by the work of [LightRAG](https://github.com/HKUDS/LightRAG). This replication and its extensions were carried out as part of the SURAJ 2026 internship at IIT Jodhpur's Machine Intelligence Lab, under the guidance of Dr. Divya Saxena and Aditya Sharma.
 
 ## Citation
 
@@ -236,7 +240,6 @@ MegaRAG is inspired by the work of [LightRAG](https://github.com/HKUDS/LightRAG)
 }
 ```
 
-## 📄 License
+## License
 
-This project is released under a custom license. See [LICENSE](./LICENSE) for full terms.
-For academic or commercial use, please contact the authors directly.
+The upstream MegaRAG project is released under a custom license — see its `LICENSE` file for full terms. For academic or commercial use of the base framework, contact the original authors directly.
